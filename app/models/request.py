@@ -1,0 +1,1 @@
+#define the table request schema using sqlalchemy
