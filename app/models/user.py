@@ -39,35 +39,26 @@ class City(Base):
 
 
 class User(Base):
-    __tablename__ = 'users'  # Table name in the database
-
-    # Define columns for the User table
-    id: str = Column(String(9), primary_key=True)  # Unique identifier for the user
-
-    first_name: str = Column(String(50), nullable=False)  # User's first name
-    last_name: str = Column(String(50), nullable=False)  # User's last name
-
-    phone_number: Optional[str] = Column(String(20), nullable=True)  # User's phone number (optional)
-    address: Optional[str] = Column(Text, nullable=True)  # User's address (optional)
-    profile_picture: Optional[str] = Column(Text, nullable=True)  # User's profile picture (optional)
-
-    city: Mapped[City] = relationship("City", back_populates="users")  # User's city
-    user_type: Mapped[UserType] = relationship("UserType", back_populates="users")  # User's type
-    status: Mapped[UserStatus] = relationship("UserStatus", back_populates="users")  # User's status
-
-    approved_at: Optional[datetime] = Column(DateTime,
-                                             nullable=True)  # Timestamp for when the user was approved (optional)
-    created_at: datetime = Column(DateTime, default=datetime.now)  # Timestamp for when the user record was created
-
-    city_id: int = Column("city", Integer, ForeignKey("cities.id"),
-                          nullable=False)  # Foreign key reference to Cities table
-    user_type_id: int = Column("user_type", Integer, ForeignKey("user_types.id"),
-                               nullable=False)  # Foreign key reference to User_Types table
-    status_id: int = Column("status", Integer, ForeignKey("user_status.id"),
-                            nullable=False)  # Foreign key reference to User_Status table
-    approved_by_id: Optional[str] = Column(String(9), ForeignKey("users.id"),
-                                           nullable=True)  # Foreign key reference to the approving user (optional)
-    authentication = relationship("Authentication", uselist=False, back_populates="user")
+    __tablename__ = 'users'
+    
+    id = Column(CHAR(9), primary_key=True)
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=False)
+    phone_number = Column(String(20))
+    address = Column(Text)
+    city = Column(Integer, ForeignKey('cities.id'), nullable=False)
+    user_type = Column(Integer, ForeignKey('user_types.id'), nullable=False)
+    profile_picture = Column(Text, nullable=True)
+    user_status = Column(Integer, nullable=True)
+    approved_by = Column(CHAR(9), ForeignKey('users.id'), nullable=True)
+    approved_at = Column(TIMESTAMP, nullable=True)
+    created_at = Column(TIMESTAMP, server_default='NOW()')
+    first_sign_in = Column(Boolean, default=True)
+    email = Column(String(100), unique=True, nullable=False)
+    password_hash = Column(Text, nullable=False)
+    
+    city_relation = relationship("City", back_populates="users")
+    user_type_relation = relationship("UserType", back_populates="users")
     families = relationship("Family", uselist=False, back_populates="user")
     volunteers = relationship("Volunteer", uselist=False, back_populates="user")
 
