@@ -83,7 +83,16 @@ def time_taken(session, start_date, end_date, city=None, type=None):
     return session.query(Request.city, func.avg(func.date_diff(Request.created_at, Request.updated_at))).filter(*filters).group_by(Request.city).all()
 
 
-
+'''
+    The function below is used to get the time taken to close a request based on the city, and type of request.
+    The function takes in the following parameters:
+    session: the session object
+    start_date: the start date of the request
+    end_date: the end date of the request
+    city: the city of the request
+    request_type: the type of request
+    The function returns the time taken to close a request based on the city, and type of request.
+'''
 def request_completion_time(session, start_date, end_date, city=None, request_type=None):
     filters = [Request.created_at.between(start_date, end_date)]
     
