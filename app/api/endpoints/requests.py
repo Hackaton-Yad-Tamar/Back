@@ -1,6 +1,9 @@
 #define APIRouter() instance for requests
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional
+
+from sqlalchemy import update
+
 from app.models.request import Request
 from app.schemas.request import RequestModel
 from app.core.database import get_db
@@ -53,3 +56,33 @@ def delete_request(request_id: str, db: Session = Depends(get_db)):
     db.delete(db_request)
     db.commit()
     return {"message": "Request deleted successfully"}
+
+
+f
+
+@request_router.patch("/request/update_status/{request_id,status_id}", response_model=RequestModel)
+def update_status(
+        request_id: str,
+        status_id: int,
+        db: Session = Depends(get_db)
+):
+    # Retrieve the Request record
+    db_request = db.query(Request).filter(Request.id == request_id).first()
+    if not db_request:
+        raise HTTPException(status_code=404, detail="Request not found")
+
+    # Validate that the new status exists in the RequestStatus table
+    if status_id ==1:
+        new_status = 2
+    elif status_id == 2:
+        new_status = 1
+    status_instance = update(Request).where(Request.id == request_id).values(status_integer=new_status)
+    if not status_instance:
+        raise HTTPException(status_code=404, detail="Status not found")
+
+    # Update the foreign key field
+    db_request.status_integer = updated_status.status_integer
+
+    db.commit()
+    db.refresh(db_request)
+    return db_request
