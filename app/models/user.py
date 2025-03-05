@@ -13,17 +13,16 @@ class UserType(Base):
     id: str = Column(Integer, primary_key=True, autoincrement=True)  # Primary key for UserTypes
     name: str = Column(String(20), unique=True, nullable=False)  # Type name (e.g., 'family', 'volunteer', 'admin')
 
-    users: Mapped[List['User']] = relationship("User",
-                                               back_populates="user_type")  # Relationship to User table
+    users = relationship("User", back_populates="user_type_relation")
 
 
-class UserStatus(Base):
-    __tablename__ = 'user_status'
+# class UserStatus(Base):
+#     __tablename__ = 'user_status'
 
-    id: str = Column(Integer, primary_key=True)  # Primary key for UserStatus
-    name: str = Column(String(50), nullable=False)  # Status name (e.g., 'pending', 'approved', 'rejected')
+#     id: str = Column(Integer, primary_key=True)  # Primary key for UserStatus
+#     name: str = Column(String(50), nullable=False)  # Status name (e.g., 'pending', 'approved', 'rejected')
 
-    users: Mapped[List['User']] = relationship("User", back_populates="status")  # Relationship to User table
+#     users: Mapped[List['User']] = relationship("User", back_populates="status")  # Relationship to User table
 
 
 class City(Base):
@@ -33,7 +32,7 @@ class City(Base):
     city_name = Column(String(50), unique=True,
                        nullable=False)  # City name (e.g., 'Istanbul', 'Ankara', 'Izmir')
 
-    users = relationship("User", back_populates="city")  # Relationship to User table
+    users = relationship("User", back_populates="city_relation")
     volunteers = relationship("Volunteer", back_populates="preferred_city_relation")  # Relationship to Volunteer table
     requests = relationship("Request", back_populates="city_relation")  # Relationship to Request table
 
