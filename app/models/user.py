@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional, Callable
 
 from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, CHAR, DateTime, \
-    SQLColumnExpression
+    SQLColumnExpression, TIMESTAMP
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import relationship, Mapped, Session
 
@@ -141,7 +141,6 @@ class Family(Base):
     __tablename__ = 'families'
 
     user_id = Column(CHAR(9), ForeignKey('users.id'), primary_key=True)
-    building_type = Column(String(50))
     floor_number = Column(Integer)
     has_parking = Column(Boolean, default=False)
     has_elevator = Column(Boolean, default=False)
