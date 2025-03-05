@@ -1,18 +1,23 @@
-# Use an official Python runtime as a parent image
-FROM python:3.12-slim
+    # Use an official Python runtime as a parent image
+    FROM python:3.12-slim
 
-# Set the working directory in the container
-WORKDIR /app-back
+    # Install PostgreSQL dependencies
+    RUN apt-get update && \
+        apt-get install -y libpq-dev build-essential && \
+        rm -rf /var/lib/apt/lists/*
 
-# Copy the current directory contents into the container at /app
-COPY . .
+    # Set the working directory in the container
+    WORKDIR /app-back
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+    # Copy the current directory contents into the container at /app
+    COPY . .
 
-# Expose the port the app runs on
-EXPOSE 8080
+    # Install any needed packages specified in requirements.txt
+    RUN pip install --upgrade pip
+    RUN pip install --no-cache-dir -r requirements.txt
 
-# Run the FastAPI app with uvicorn when the container launches
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+    # Expose the port the app runs on
+    EXPOSE 8080
+
+    # Run the FastAPI app with uvicorn when the container launches
+    CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
