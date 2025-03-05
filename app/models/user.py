@@ -5,6 +5,7 @@ from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, TIMES
 from sqlalchemy.orm import relationship, declarative_base, Mapped, Session
 
 from app.models.request import Base
+from sqlalchemy.exc import SQLAlchemyError
 
 
 
@@ -72,6 +73,30 @@ class User(Base):
         :param kwargs: Attributes to update for the user
         :return: The updated user if found, None otherwise
         """
+        try:
+            # Fetch the user by ID
+            user = session.query(cls).filter_by(id=user_id).first()
+
+            # If user does not exist, return None
+            if not user:
+                return None
+
+            # Update user attributes
+            for key, value in kwargs.items():
+                if hasattr(user, key):  # Ensure the attribute exists
+                    setattr(user, key, value)
+
+            # Commit changes
+            session.commit()
+            session.refresh(user)  # Refresh to get updated data from the database
+
+            return user
+
+        except SQLAlchemyError as e:
+            session.rollback()  # Rollback on error
+            print(f"Error updating user: {e}")
+            return None
+
         raise NotImplementedError
 
     @classmethod
@@ -84,6 +109,20 @@ class User(Base):
         :param filters: Filters to apply to the query
         :return: List of users matching the filters
         """
+
+        query = session.query(cls)
+
+        # Apply filters if provided
+        if filters:
+            for attr, value in filters.items():
+                if hasattr(cls, attr):  # Ensure the attribute exists in the model
+                    query = query.filter(getattr(cls, attr) == value)
+
+        # Apply ordering if provided
+        if order_by:
+            query = query.order_by(*order_by)
+
+        return query.all()
         raise NotImplementedError
 
     @classmethod
@@ -94,6 +133,8 @@ class User(Base):
         :param user_id: Identifier for the user to retrieve
         :return: The user if found, None otherwise
         """
+
+        return session.query(User).filter_by(id=user_id).first()
         raise NotImplementedError
 
 
