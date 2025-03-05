@@ -1,6 +1,6 @@
 from typing import List, Optional, Callable
 
-from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, CHAR, SQLColumnExpression, TIMESTAMP
+from sqlalchemy import Column, DateTime, Integer, String, Boolean, Text, ForeignKey, CHAR, SQLColumnExpression, TIMESTAMP
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import relationship, Mapped, Session
 
