@@ -40,8 +40,6 @@ def city_count(session: Session, start_date: datetime, end_date: datetime, statu
         .group_by(City.city_name)
     )
 
-    print(query)
-
     res = query.all()
 
     return {city: count for city, count in res}
@@ -159,7 +157,7 @@ def request_completion_time(session: Session, start_date: datetime, end_date: da
     return {request_id: completion_time for request_id, completion_time in res}
 
 
-def filtered_data(session: Session, start_date: datetime, end_date: datetime, status : Optional[str], request_type: Optional[str] = None,  
+def filtered_data(session: Session, start_date: datetime, end_date: datetime, status : Optional[str], request_type: Optional[str] = None,
                   city: Optional[str] = None):
     """
         The function below is used to get the filtered data based on the city, and type of request.
@@ -172,11 +170,11 @@ def filtered_data(session: Session, start_date: datetime, end_date: datetime, st
         The function returns the filtered data based on the city, and type of request.
     """
     filters = [Request.created_at.between(start_date, end_date)]
-    
+
     query = session.query(
         Request.id
     )
-        
+
     if city is not None:
         query = query.join(City, Request.city == City.id)
         filters.append(City.city_name == city)
@@ -186,7 +184,7 @@ def filtered_data(session: Session, start_date: datetime, end_date: datetime, st
     if status is not None:
         query = query.join(RequestStatus, Request.status == RequestStatus.id)
         filters.append(RequestStatus.status_name == status)
-    
+
     query = (
         session.query(Request)
         .join(City, Request.city == City.id)
