@@ -81,7 +81,7 @@ def update_status(
         raise HTTPException(status_code=404, detail="Status not found")
 
     # Update the foreign key field
-    db_request.status_integer = updated_status.status_integer
+    db_request.status_integer = Request.status_integer
 
     db.commit()
     db.refresh(db_request)
