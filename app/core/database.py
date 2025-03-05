@@ -1,19 +1,20 @@
-# Database connection
+import os
+
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-from .config import DB_CONFIG
+from sqlalchemy.orm import sessionmaker
 
-host = DB_CONFIG['host']
-port = DB_CONFIG['port']
-db_name = DB_CONFIG['dbname']
-user = DB_CONFIG['user']
-password = DB_CONFIG['password']
+load_dotenv()
 
-DATABASE_URL = f"postgresql://{user}:{password}@{host}/{db_name}"
+DB_IP = os.getenv("DB_IP", "localhost")
+POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres") 
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
+DB_NAME = os.getenv("DB_NAME", "postgres")
+
+DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_IP}/{DB_NAME}"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Dependency to get DB session
 def get_db():
     db = SessionLocal()
     try:
