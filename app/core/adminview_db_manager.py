@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.core.adminview_db import city_count, status_count, type_count
+from app.core.adminview_db import city_count, status_count, type_count, time_taken, request_completion_time
 from fastapi import FastAPI
 
 class DBManager:
@@ -29,6 +29,12 @@ class DBManager:
     def type_count(self, start_date, end_date, city=None, type=None):
         return self.execute_query(type_count, start_date, end_date, city, type)
     
+    def time_taken(self, start_date, end_date, city=None, type=None):
+        return self.execute_query(time_taken, start_date, end_date, city, type)
+    
+    def request_completion_time(self, start_date, end_date, city=None, request_type=None):
+        return self.execute_query(request_completion_time, start_date, end_date, city, request_type)
+
     def register_routes(self):
         """Registers API routes related to this manager."""
         @self.app.post("/city-count")
@@ -42,3 +48,11 @@ class DBManager:
         @self.app.post("/type-count")
         def get_type_count(start_date: str, end_date: str, city: str = None, request_type: str = None):
             return self.type_count(start_date, end_date, city, request_type)
+        
+        @self.app.post("/time-taken")
+        def get_time_taken(start_date: str, end_date: str, city: str = None, request_type: str = None):
+            return self.time_taken(start_date, end_date, city, request_type)
+        
+        @self.app.post("/request-completion-time")
+        def get_request_completion_time(start_date: str, end_date: str, city: str = None, request_type: str = None):
+            return self.request_completion_time(start_date, end_date, city, request_type)
