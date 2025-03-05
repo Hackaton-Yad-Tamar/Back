@@ -8,7 +8,6 @@ from app.models.request import Base
 from sqlalchemy.exc import SQLAlchemyError
 
 
-
 class UserType(Base):
     __tablename__ = 'user_types'
 
@@ -32,7 +31,8 @@ class City(Base):
     __tablename__ = 'cities'
 
     id = Column(Integer, primary_key=True, autoincrement=True)  # Primary key for Cities
-    name = Column(String(50), unique=True, nullable=False)  # City name (e.g., 'Istanbul', 'Ankara', 'Izmir')
+    city_name = Column(String(50), unique=True,
+                       nullable=False)  # City name (e.g., 'Istanbul', 'Ankara', 'Izmir')
 
     users = relationship("User", back_populates="city_relation")  # Relationship to User table
     volunteers = relationship("Volunteer", back_populates="preferred_city_relation")  # Relationship to Volunteer table
@@ -151,16 +151,6 @@ class Family(Base):
 
     user = relationship("User", back_populates="families")
     requests = relationship("Request", back_populates="family_relation")
-
-
-class RequestType(Base):
-    __tablename__ = 'request_types'
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    type_name = Column(String(50), unique=True, nullable=False)
-
-    requests = relationship("Request", back_populates="request_type_relation")
-    volunteers = relationship("Volunteer", back_populates="preferred_skill_relation")
 
 
 class License(Base):
