@@ -1,10 +1,11 @@
 from fastapi import FastAPI
-
+from fastapi.middleware.cors import CORSMiddleware
 from .api.endpoints.admin.dashboard import dashboard_router
 from .api.endpoints.users import users_router
 
 app = FastAPI()
 app.add_middleware(
+    CORSMiddleware,
     allow_origins=["*"],         # Allows specific origins
     allow_credentials=True,        # Allows cookies
     allow_methods=["*"],           # Allows all HTTP methods

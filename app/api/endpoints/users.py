@@ -36,7 +36,13 @@ def signUp(
     
     return {"isFirstTime": False}
 @users_router.get("/cities")
-def signUp(
+def getCities(
     db: Session = Depends(get_db)):
     cities = db.query(City).all()
     return cities
+
+# @users_router.get("/cities")
+# def getCities(
+#     db: Session = Depends(get_db)):
+#     cities = db.query(City).all()
+#     return cities
