@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List, Optional, Callable
 
 from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, CHAR, DateTime, \
@@ -7,7 +6,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import relationship, Mapped, Session
 
 from app.models.request import Base
-from sqlalchemy.exc import SQLAlchemyError
 
 
 class UserType(Base):
@@ -58,8 +56,8 @@ class User(Base):
     profile_picture = Column(Text, nullable=True)
     user_status = Column(Integer, ForeignKey('user_status.id'), nullable=True)
     approved_by = Column(CHAR(9), ForeignKey('users.id'), nullable=True)
-    approved_at = Column(TIMESTAMP, nullable=True)
-    created_at = Column(TIMESTAMP, server_default='NOW()')
+    approved_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, server_default='NOW()')
     first_sign_in = Column(Boolean, default=True)
     email = Column(String(100), unique=True, nullable=False)
     password_hash = Column(Text, nullable=False)
