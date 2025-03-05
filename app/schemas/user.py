@@ -1,5 +1,5 @@
 # Pydantic schemas for user
-from pydantic import BaseModel, Field, field_validator, EmailStr
+from pydantic import BaseModel, Field, EmailStr
 from typing import Optional
 import re
 
