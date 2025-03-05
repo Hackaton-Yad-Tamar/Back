@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Callable
 
 from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, TIMESTAMP, CHAR, DateTime
-from sqlalchemy.orm import relationship, declarative_base, Mapped
+from sqlalchemy.orm import relationship, declarative_base, Mapped, Session
 
 Base = declarative_base()
 
@@ -69,6 +69,39 @@ class User(Base):
     authentication = relationship("Authentication", uselist=False, back_populates="user")
     families = relationship("Family", uselist=False, back_populates="user")
     volunteers = relationship("Volunteer", uselist=False, back_populates="user")
+
+    @classmethod
+    def update_user(cls, session: Session, user_id: str, **kwargs: dict) -> Optional['User']:
+        """
+        Update an existing user in the database with the provided attributes.
+        :param session: SQLAlchemy database session
+        :param user_id: Identifier for the user to update
+        :param kwargs: Attributes to update for the user
+        :return: The updated user if found, None otherwise
+        """
+        raise NotImplementedError
+
+    @classmethod
+    def get_users(cls, session: Session, order_by: Optional[List[Callable]] = None, filters: dict = None) \
+            -> List['User']:
+        """
+        Retrieve a list of users from the database based on the provided filters.
+        :param session: SQLAlchemy database session
+        :param order_by: List of functions to order the results. Look at asc() and desc() from sqlalchemy
+        :param filters: Filters to apply to the query
+        :return: List of users matching the filters
+        """
+        raise NotImplementedError
+
+    @classmethod
+    def get_user(cls, session: Session, user_id: str) -> Optional['User']:
+        """
+        Retrieve a user from the database based on the provided identifier.
+        :param session: SQLAlchemy database session
+        :param user_id: Identifier for the user to retrieve
+        :return: The user if found, None otherwise
+        """
+        raise NotImplementedError
 
 
 class Authentication(Base):
