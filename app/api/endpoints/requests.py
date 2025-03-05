@@ -4,16 +4,17 @@ from typing import Optional
 from app.models.request import Request
 from app.schemas.request import RequestModel
 from app.core.database import get_db
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
+from app.models.user import *
 
 request_router = APIRouter()
 
-@request_router.get("/request", response_model=list[RequestModel])
+@request_router.get("/request")
 def read_all_requests(id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     if id:
-        results = db.query(Request).filter(Request.id == id).all()
+        results = db.query(Request).options(joinedload(Request.request_type_relation).filter(Request.id == id)).all()
     else:
-        results = db.query(Request).all()
+        results = db.query(Request).options(joinedload(Request.request_type_relation)).all()
     return results
 
 # Create a New Request
