@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Query, HTTPException, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import (
     create_engine, Column, String, Integer, Boolean, DateTime, func, ForeignKey, Enum, Text
 )
@@ -9,7 +9,7 @@ from datetime import datetime
 import uuid
 import enum
 
-# PostgreSQL Database Configuration
+# Postgres Configuration
 POSTGRES_IP = "20.50.143.29"
 POSTGRES_USER = "yad-tamar"
 POSTGRES_PASSWORD = "kingshoval!123"
@@ -20,56 +20,48 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Enum for request types to restrict allowed values
+# Enum for request types
 class RequestType(enum.Enum):
     FOOD = "food"
     MEDICAL = "medical"
     TRANSPORT = "transport"
     OTHER = "other"
 
-# Cities table to enforce valid city references
+# Cities table
 class City(Base):
     __tablename__ = 'cities'
-
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100), unique=True, nullable=False)
-
     requests = relationship("Request", back_populates="city")
 
-# Families table to ensure valid family references
+# Families table
 class Family(Base):
     __tablename__ = 'families'
-
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
-
     requests = relationship("Request", back_populates="family")
 
-# Volunteers table for tracking assigned volunteers
+# Volunteers table
 class Volunteer(Base):
     __tablename__ = 'volunteers'
-
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
-
     assigned_requests = relationship("Request", back_populates="assigned_volunteer")
 
-# Request statuses to enforce valid statuses
+# Request statuses table
 class RequestStatus(Base):
     __tablename__ = 'request_statuses'
-
     id = Column(Integer, primary_key=True, autoincrement=True)
     status = Column(String(50), unique=True, nullable=False)
-
     requests = relationship("Request", back_populates="status")
 
-# Requests table with foreign key constraints
+# Requests table
 class Request(Base):
     __tablename__ = "requests"
 
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))  # UUID for unique request IDs
     family_id = Column(Integer, ForeignKey('families.id'), nullable=False)
-    request_type = Column(Enum(RequestType), nullable=False)  # Enum-enforced request type
+    request_type = Column(Enum(RequestType), nullable=False)
     description = Column(Text, nullable=True)
     city_id = Column(Integer, ForeignKey('cities.id'), nullable=False)
     status_id = Column(Integer, ForeignKey('request_statuses.id'), default=1, nullable=False)
@@ -98,9 +90,9 @@ def get_db():
 
 app = FastAPI()
 
-# Pydantic Model for creating a new request
-class RequestCreate(BaseModel):
-    id: str
+# Unified Pydantic model for creating and returning requests
+class RequestModel(BaseModel):
+    id: Optional[str] = Field(default_factory=lambda: str(uuid.uuid4()), description="Unique request ID")
     family_id: int
     request_type: RequestType
     description: Optional[str] = None
@@ -110,26 +102,13 @@ class RequestCreate(BaseModel):
     assigned_volunteer_id: Optional[int] = None
     expected_completion: Optional[datetime] = None
     preferred_datetime: Optional[datetime] = None
-
-# Pydantic Model for returning request details
-class RequestResponse(BaseModel):
-    id: str
-    family_id: int
-    request_type: RequestType
-    description: Optional[str]
-    city_id: int
-    status_id: int
-    is_urgent: bool
-    assigned_volunteer_id: Optional[int]
-    expected_completion: Optional[datetime]
-    preferred_datetime: Optional[datetime]
-    created_at: datetime
+    created_at: Optional[datetime] = None  # Only set when returning a request
 
     class Config:
-        from_attributes = True
+        from_attributes = True  # Enables automatic conversion from ORM models
 
-# Read All Requests or Filter by ID
-@app.get("/request", response_model=list[RequestResponse])
+# Read all requests or filter by ID
+@app.get("/request", response_model=list[RequestModel])
 def read_all_requests(id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     if id:
         results = db.query(Request).filter(Request.id == id).all()
@@ -137,10 +116,10 @@ def read_all_requests(id: Optional[str] = Query(None), db: Session = Depends(get
         results = db.query(Request).all()
     return results
 
-# Create a New Request
+# Create a new request
 @app.post("/request", response_model=dict)
-def create_request(request: RequestCreate, db: Session = Depends(get_db)):
-    new_request = Request(**request.model_dump())
+def create_request(request: RequestModel, db: Session = Depends(get_db)):
+    new_request = Request(**request.model_dump(exclude={"id", "created_at"}))  # Exclude auto-generated fields
     db.add(new_request)
     try:
         db.commit()
@@ -150,21 +129,21 @@ def create_request(request: RequestCreate, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
 
-# Update an Existing Request
-@app.put("/request/{request_id}", response_model=RequestResponse)
-def update_request(request_id: str, updated_request: RequestCreate, db: Session = Depends(get_db)):
+# Update an existing request
+@app.put("/request/{request_id}", response_model=RequestModel)
+def update_request(request_id: str, updated_request: RequestModel, db: Session = Depends(get_db)):
     db_request = db.query(Request).filter(Request.id == request_id).first()
     if not db_request:
         raise HTTPException(status_code=404, detail="Request not found")
 
-    for key, value in updated_request.dict(exclude_unset=True).items():
+    for key, value in updated_request.dict(exclude_unset=True, exclude={"id", "created_at"}).items():
         setattr(db_request, key, value)
 
     db.commit()
     db.refresh(db_request)
     return db_request
 
-# Delete a Request
+# Delete a request
 @app.delete("/request/{request_id}", response_model=dict)
 def delete_request(request_id: str, db: Session = Depends(get_db)):
     db_request = db.query(Request).filter(Request.id == request_id).first()
