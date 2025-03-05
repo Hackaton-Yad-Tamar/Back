@@ -35,9 +35,9 @@ class UserResponse(BaseModel):
             phone_number=user.phone_number,
             address=user.address,
             profile_picture=user.profile_picture,
-            city_id=user.city_id,
-            user_type_id=user.user_type_id,
-            status_id=user.status_id,
+            city_id=user.city,
+            user_type_id=user.user_type,
+            status_id=user.user_status,
             approved_at=user.approved_at,
             created_at=user.created_at
         )
