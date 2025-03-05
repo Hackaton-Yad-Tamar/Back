@@ -13,16 +13,17 @@ class UserType(Base):
     id: str = Column(Integer, primary_key=True, autoincrement=True)  # Primary key for UserTypes
     name: str = Column(String(20), unique=True, nullable=False)  # Type name (e.g., 'family', 'volunteer', 'admin')
 
-    users = relationship("User", back_populates="user_type_relation")
+    users: Mapped[List['User']] = relationship("User",
+                                               back_populates="user_type_relation")  # Relationship to User table
 
 
-# class UserStatus(Base):
-#     __tablename__ = 'user_status'
+class UserStatus(Base):
+    __tablename__ = 'user_status'
 
-#     id: str = Column(Integer, primary_key=True)  # Primary key for UserStatus
-#     name: str = Column(String(50), nullable=False)  # Status name (e.g., 'pending', 'approved', 'rejected')
+    id: str = Column(Integer, primary_key=True)  # Primary key for UserStatus
+    name: str = Column(String(50), nullable=False)  # Status name (e.g., 'pending', 'approved', 'rejected')
 
-#     users: Mapped[List['User']] = relationship("User", back_populates="status")  # Relationship to User table
+users: Mapped[List['User']] = relationship("User", back_populates="user_status_relation")  # Relationship to User table
 
 
 class City(Base):
@@ -32,7 +33,7 @@ class City(Base):
     city_name = Column(String(50), unique=True,
                        nullable=False)  # City name (e.g., 'Istanbul', 'Ankara', 'Izmir')
 
-    users = relationship("User", back_populates="city_relation")
+    users = relationship("User", back_populates="city_relation")  # Relationship to User table
     volunteers = relationship("Volunteer", back_populates="preferred_city_relation")  # Relationship to Volunteer table
     requests = relationship("Request", back_populates="city_relation")  # Relationship to Request table
 
@@ -48,7 +49,7 @@ class User(Base):
     city = Column(Integer, ForeignKey('cities.id'), nullable=False)
     user_type = Column(Integer, ForeignKey('user_types.id'), nullable=False)
     profile_picture = Column(Text, nullable=True)
-    user_status = Column(Integer, nullable=True)
+    user_status = Column(Integer, ForeignKey('user_status.id'), nullable=True)
     approved_by = Column(CHAR(9), ForeignKey('users.id'), nullable=True)
     approved_at = Column(TIMESTAMP, nullable=True)
     created_at = Column(TIMESTAMP, server_default='NOW()')
@@ -58,6 +59,7 @@ class User(Base):
     
     city_relation = relationship("City", back_populates="users")
     user_type_relation = relationship("UserType", back_populates="users")
+    user_status_relation = relationship("UserStatus", back_populates="users")
     families = relationship("Family", uselist=False, back_populates="user")
     volunteers = relationship("Volunteer", uselist=False, back_populates="user")
 
@@ -93,7 +95,6 @@ class User(Base):
         :return: The user if found, None otherwise
         """
         raise NotImplementedError
-
 
 
 

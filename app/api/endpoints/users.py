@@ -5,6 +5,8 @@ from app.models.user import City, User, Volunteer
 from app.schemas.user import DTO_for_vulenteer_signup, UserDTO_for_signin
 import uuid
 
+from app.models.user import User
+
 users_router = APIRouter()
 
 @users_router.post("/signin")
