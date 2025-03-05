@@ -1,5 +1,6 @@
 # Pydantic schemas for user
 from pydantic import BaseModel, Field, field_validator, EmailStr
+from typing import Optional
 import re
 
 HASH_REGEX = re.compile(r"^[a-fA-F0-9]{32,64}$")
@@ -44,5 +45,4 @@ class DTO_for_family_signup(DTO_users_for_signup):
 class UserDTO_for_signin(BaseModel):
     #data to get from users when signing in
     email: EmailStr
-    password: str = Field(..., regex=HASH_REGEX.pattern)
-    first_sign_in: boolser
+    password: str = Field(..., pattern=HASH_REGEX.pattern)

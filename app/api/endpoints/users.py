@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
+from app.models.user import User
+from app.schemas.user import UserDTO_for_signin
 
 users_router = APIRouter()
 
-#דוגמה ליצירת ראוט וראוטר
-@users_router.get("/")
-def read_user(db: Session = Depends(get_db)):
-    # db_user = crud.get_user(db, user_id=user_id)
-    # if db_user is None:
-    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+@users_router.post("/signin")
+def signIn(
+    userDetails: UserDTO_for_signin,
+    db: Session = Depends(get_db)):
+    user = db.query(User).first()
+    print(user.authentication)
     return "אני רק דוגמהההה"

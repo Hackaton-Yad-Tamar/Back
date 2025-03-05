@@ -7,7 +7,6 @@ from sqlalchemy.orm import relationship, declarative_base, Mapped, Session
 from app.models.request import Base
 
 
-
 class UserType(Base):
     __tablename__ = 'user_types'
 
@@ -31,7 +30,8 @@ class City(Base):
     __tablename__ = 'cities'
 
     id = Column(Integer, primary_key=True, autoincrement=True)  # Primary key for Cities
-    name = Column(String(50), unique=True, nullable=False)  # City name (e.g., 'Istanbul', 'Ankara', 'Izmir')
+    city_name = Column(String(50), unique=True,
+                       nullable=False)  # City name (e.g., 'Istanbul', 'Ankara', 'Izmir')
 
     users = relationship("User", back_populates="city")  # Relationship to User table
     volunteers = relationship("Volunteer", back_populates="preferred_city_relation")  # Relationship to Volunteer table
@@ -54,6 +54,8 @@ class User(Base):
     city: Mapped[City] = relationship("City", back_populates="users")  # User's city
     user_type: Mapped[UserType] = relationship("UserType", back_populates="users")  # User's type
     status: Mapped[UserStatus] = relationship("UserStatus", back_populates="users")  # User's status
+    email = Column(String(100), unique=True, nullable=False)
+    password_hash = Column(Text)
 
     approved_at: Optional[datetime] = Column(DateTime,
                                              nullable=True)  # Timestamp for when the user was approved (optional)
@@ -67,7 +69,6 @@ class User(Base):
                             nullable=False)  # Foreign key reference to User_Status table
     approved_by_id: Optional[str] = Column(String(9), ForeignKey("users.id"),
                                            nullable=True)  # Foreign key reference to the approving user (optional)
-    authentication = relationship("Authentication", uselist=False, back_populates="user")
     families = relationship("Family", uselist=False, back_populates="user")
     volunteers = relationship("Volunteer", uselist=False, back_populates="user")
 
@@ -105,14 +106,6 @@ class User(Base):
         raise NotImplementedError
 
 
-class Authentication(Base):
-    __tablename__ = 'authentication'
-
-    user_id = Column(CHAR(9), ForeignKey('users.id'), primary_key=True)
-    email = Column(String(100), unique=True, nullable=False)
-    password_hash = Column(Text, nullable=False)
-
-    user = relationship("User", back_populates="authentication")
 
 
 class Family(Base):
@@ -127,16 +120,6 @@ class Family(Base):
 
     user = relationship("User", back_populates="families")
     requests = relationship("Request", back_populates="family_relation")
-
-
-class RequestType(Base):
-    __tablename__ = 'request_types'
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    type_name = Column(String(50), unique=True, nullable=False)
-
-    requests = relationship("Request", back_populates="request_type_relation")
-    volunteers = relationship("Volunteer", back_populates="preferred_skill_relation")
 
 
 class License(Base):
