@@ -25,10 +25,6 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      # - name: Run tests # 🔄 שלב 4: הרצת בדיקות (אם יש)
-      #   run: |
-      #     pytest  # רק אם יש לך טסטים, אפשר להסיר אם לא
-
       - name: Build Docker image
         run: |
           docker build -t my-backend:latest .
@@ -36,5 +32,5 @@ jobs:
       - name: Push Docker image to Docker Hub
         run: |
           echo Aa123456! | docker login -u yadtamar --password-stdin
-          docker tag my-frontend:latest yadtamar/back:latest
+          docker tag my-backend:latest yadtamar/back:latest
           docker push yadtamar/back:latest
