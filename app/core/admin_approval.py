@@ -1,20 +1,13 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from ..models.user import User
-
-from pydantic import BaseModel
-from typing import Optional
-from datetime import datetime
-
-from sqlalchemy.orm import Session
-
+import hashlib
 import random
 import string
-import hashlib
+from typing import List
 
 import requests
-import json
+from sqlalchemy.orm import Session
+
+from ..models.user import User, UserStatus
+
 
 def send_email(user_email, subject, message):
     # API URL
@@ -46,48 +39,15 @@ def send_email(user_email, subject, message):
         print(response.json())  # Print error details
 
 
-class UserResponse(BaseModel):
-    id: str
-    first_name: str
-    last_name: str
-    phone_number: Optional[str]
-    address: Optional[str]
-    profile_picture: Optional[str]
-    city_id: int
-    user_type_id: int
-    status_id: int
-    approved_at: Optional[datetime]
-    created_at: datetime
+def unapproved_users(session: Session) -> List[User]:
+    users = User.get_users(session,
+                           filters=[User.status_id == UserStatus.PENDING])  # TODO: replace status with requested
 
-
-
-
-def unapproved_users(session: Session):
-    try:
-        print(session.query(User).filter(User.status_id == 2))
-        users = session.query(User).filter(User.status_id == 2).all() #TODO: replace status with requested
-        user_responses = [UserResponse(
-            id=user.id,
-            first_name=user.first_name,
-            last_name=user.last_name,
-            phone_number=user.phone_number,
-            address=user.address,
-            profile_picture=user.profile_picture,
-            city_id=user.city_id,
-            user_type_id=user.user_type_id,
-            status_id=user.status_id,
-            approved_at=user.approved_at,
-            created_at=user.created_at
-        ) for user in users]
-        return user_responses
-    finally:
-        session.close()
-
-
+    return users
 
 
 def do_approve_user(session: Session, user_id: string):
-    '''
+    """
     Approve or reject a user based on the user_id
     if approved:
     - generate new password
@@ -97,40 +57,30 @@ def do_approve_user(session: Session, user_id: string):
     if rejected:
     - update user status to rejected
     - send email to user that he/she got rejected (optional)
-    
-    '''
-    try:
-        user = session.query(User).filter(User.id == user_id).first()
-        if user:
-            user.status = 1 # TODO: replace status with approved
-            # generate new password
-            characters = string.ascii_letters + string.digits  # Letters (uppercase + lowercase) and digits
-            password = ''.join(random.choice(characters) for _ in range(12))  # Randomly choose characters
-            hashed_password = hashlib.sha256(password.encode()).hexdigest()
-            
-            user.hashed_password = hashed_password #TODO: check hashed_password field
-            send_email(user.email, "successfully connection to Yad-Tamar", password)
-            
-            session.commit()
-            session.refresh(user)
-        return None
-    except Exception as e:
-        session.rollback()
-        raise e
-    finally:
-        session.close()
+
+    """
+    user = User.get_user(session, user_id)
+    if user:
+        user.status_id = UserStatus.APPROVED
+        # generate new password
+        characters = string.ascii_letters + string.digits  # Letters (uppercase + lowercase) and digits
+        password = ''.join(random.choice(characters) for _ in range(12))  # Randomly choose characters
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+        user.hashed_password = hashed_password  # TODO: check hashed_password field
+        send_email(user.email, "Successful connection to Yad-Tamar: ", password)
+
+        session.commit()
+        session.refresh(user)
+        return user
+    return None
+
 
 def do_reject_user(session: Session, user_id: string):
-    try:
-        print("try1")
-        user = session.query(User).filter(User.id == user_id).first()
-        if user:
-            user.status_id = 0 # TODO: replace status with rejected
-            session.commit()
-            session.refresh(user)
-            return None
-    except Exception as e:
-        session.rollback()
-        raise e
-    finally:
-        session.close()
+    user = User.get_user(session, user_id)
+    if user:
+        user.status_id = UserStatus.REJECTED
+        session.commit()
+        session.refresh(user)
+        return user
+    return None
