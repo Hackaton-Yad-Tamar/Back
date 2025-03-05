@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware  # Import CORS middleware
 
 from .api.endpoints.admin.dashboard import dashboard_router
 from .api.endpoints.users import users_router
+from .api.endpoints.admin.approval_api import approve_users
 
 app = FastAPI()
 
@@ -16,6 +17,7 @@ app.add_middleware(
 
 app.include_router(users_router, prefix="/users")
 app.include_router(dashboard_router, prefix="/admin/dashboard")
+app.include_router(approve_users, prefix="/admin/approval")
 
 
 @app.get("/")

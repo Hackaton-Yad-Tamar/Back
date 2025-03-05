@@ -66,9 +66,9 @@ class User(Base):
                           nullable=False)  # Foreign key reference to Cities table
     user_type_id: int = Column("user_type", Integer, ForeignKey("user_types.id"),
                                nullable=False)  # Foreign key reference to User_Types table
-    status_id: int = Column("status", Integer, ForeignKey("user_status.id"),
+    status_id: int = Column("user_status", Integer, ForeignKey("user_status.id"),
                             nullable=False)  # Foreign key reference to User_Status table
-    approved_by_id: Optional[str] = Column(String(9), ForeignKey("users.id"),
+    approved_by_id: Optional[str] = Column("approved_by", String(9), ForeignKey("users.id"),
                                            nullable=True)  # Foreign key reference to the approving user (optional)
     families = relationship("Family", uselist=False, back_populates="user")
     volunteers = relationship("Volunteer", uselist=False, back_populates="user")
