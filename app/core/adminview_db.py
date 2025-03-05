@@ -83,17 +83,21 @@ def type_count(session, start_date, end_date, city=None, type=None):
     The function returns the time taken to close a request based on the city, and type of request.
 '''
 
-
-def time_taken(session, start_date, end_date, city=None, type=None):
+def time_taken(session, start_date, end_date, city=None, request_type=None):
     filters = [Request.created_at.between(start_date, end_date), Request.status == 'closed']
-
+    
     if city:
         filters.append(Request.city == city)
-    if type:
-        filters.append(Request.request_type == type)
+    if request_type:
+        filters.append(Request.request_type == request_type)
 
-    return session.query(Request.city, func.avg(func.date_diff(Request.created_at, Request.updated_at))).filter(
-        *filters).group_by(Request.city).all()
+    return session.query(
+        Request.city,
+        func.avg(func.extract('epoch', RequestProcess.completed_at) - func.extract('epoch', Request.created_at)).label("average_time_taken")
+    ).join(RequestProcess, Request.id == RequestProcess.request_id) \
+     .filter(*filters) \
+     .group_by(Request.city) \
+     .all()
 
 
 '''
