@@ -30,7 +30,10 @@ jobs:
           docker build -t my-backend:latest .
 
       - name: Push Docker image to Docker Hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          echo Aa123456! | docker login -u yadtamar --password-stdin
+          echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
           docker tag my-backend:latest yadtamar/back:latest
           docker push yadtamar/back:latest
