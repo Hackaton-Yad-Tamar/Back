@@ -58,7 +58,7 @@ def delete_request(request_id: str, db: Session = Depends(get_db)):
     return {"message": "Request deleted successfully"}
 
 
-f
+
 
 @request_router.patch("/request/update_status/{request_id,status_id}", response_model=RequestModel)
 def update_status(
@@ -72,7 +72,7 @@ def update_status(
         raise HTTPException(status_code=404, detail="Request not found")
 
     # Validate that the new status exists in the RequestStatus table
-    if status_id ==1:
+    if status_id == 1:
         new_status = 2
     elif status_id == 2:
         new_status = 1
