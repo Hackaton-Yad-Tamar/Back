@@ -29,7 +29,7 @@ class DTO_for_vulenteer_signup(DTO_users_for_signup):
 
 
 class DTO_for_family_signup(DTO_users_for_signup):
-    building_type: str = Field(..., min_length=2, max_length=50)
+    building_type: Optional[str] = None
     floor_number: Optional[int]
     has_parking: bool
     has_elevator: Optional[bool]
