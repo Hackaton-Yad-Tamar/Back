@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import func
+from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
 from app.models.request import Request, RequestProcess, RequestStatus, RequestType
@@ -157,3 +157,17 @@ def request_completion_time(session: Session, start_date: datetime, end_date: da
     res = query.all()
 
     return {request_id: completion_time for request_id, completion_time in res}
+
+
+def custom_query(session: Session, query: str):
+    """
+        The function below is used to run a RAW SQL query.
+        The function takes in the following parameters:
+        session: the session object
+        query: the RAW SQL query
+        The function returns the result of the RAW SQL query.
+    """
+    res = session.execute(text(query))
+    fetchall = res.fetchall()
+    return fetchall
+
