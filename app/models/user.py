@@ -1,8 +1,10 @@
 from datetime import datetime
 from typing import List, Optional, Callable
 
-from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, TIMESTAMP, CHAR, DateTime
-from sqlalchemy.orm import relationship, declarative_base, Mapped, Session
+from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, CHAR, DateTime, \
+    SQLColumnExpression
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import relationship, Mapped, Session
 
 from app.models.request import Base
 from sqlalchemy.exc import SQLAlchemyError
@@ -20,6 +22,10 @@ class UserType(Base):
 
 class UserStatus(Base):
     __tablename__ = 'user_status'
+
+    PENDING = 0
+    APPROVED = 1
+    REJECTED = 2
 
     id: str = Column(Integer, primary_key=True)  # Primary key for UserStatus
     name: str = Column(String(50), nullable=False)  # Status name (e.g., 'pending', 'approved', 'rejected')
@@ -75,8 +81,7 @@ class User(Base):
         """
         try:
             # Fetch the user by ID
-            user = session.query(cls).filter_by(id=user_id).first()
-
+            user = User.get_user(session, user_id)
             # If user does not exist, return None
             if not user:
                 return None
@@ -97,10 +102,9 @@ class User(Base):
             print(f"Error updating user: {e}")
             return None
 
-        raise NotImplementedError
-
     @classmethod
-    def get_users(cls, session: Session, order_by: Optional[List[Callable]] = None, filters: dict = None) \
+    def get_users(cls, session: Session, order_by: Optional[List[Callable]] = None,
+                  filters: Optional[List[SQLColumnExpression]] = None) \
             -> List['User']:
         """
         Retrieve a list of users from the database based on the provided filters.
@@ -113,17 +117,14 @@ class User(Base):
         query = session.query(cls)
 
         # Apply filters if provided
-        if filters:
-            for attr, value in filters.items():
-                if hasattr(cls, attr):  # Ensure the attribute exists in the model
-                    query = query.filter(getattr(cls, attr) == value)
+        if filters is not None:
+            query = query.filter(*filters)
 
         # Apply ordering if provided
-        if order_by:
+        if order_by is not None:
             query = query.order_by(*order_by)
 
         return query.all()
-        raise NotImplementedError
 
     @classmethod
     def get_user(cls, session: Session, user_id: str) -> Optional['User']:
@@ -133,10 +134,7 @@ class User(Base):
         :param user_id: Identifier for the user to retrieve
         :return: The user if found, None otherwise
         """
-
         return session.query(User).filter_by(id=user_id).first()
-        raise NotImplementedError
-
 
 
 class Family(Base):

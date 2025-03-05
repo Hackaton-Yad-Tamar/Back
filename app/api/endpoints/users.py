@@ -8,6 +8,8 @@ import uuid
 
 from app.models.user import User
 
+from app.models.user import User
+
 users_router = APIRouter()
 
 @users_router.post("/signin")
@@ -17,7 +19,14 @@ def signIn(
     user = db.query(User).filter_by(email=userDetails.email, password_hash=userDetails.password).first()
     if user is None:
         raise HTTPException(status_code=404, detail=f"User '{userDetails.email}' not found")
+    elif user.first_sign_in is True:
+        user.first_sign_in = False
+        db.commit()
+        db.refresh(user)
+        return {"isFirstTime": True}
     return {"isFirstTime": False}
+    
+    
 
 @users_router.post("/signup/vulenteer")
 def signUpVulenteer(
@@ -71,3 +80,18 @@ def getLicenses(
     db: Session = Depends(get_db)):
     skills = db.query(RequestType).all()
     return skills
+
+@users_router.patch("/update-password")
+def update_user_first_name(    
+    userDetails: UserDTO_for_signin,
+    db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == userDetails.email).first()
+
+    if user:
+        user.password_hash = userDetails.password
+        db.commit()
+        db.refresh(user)
+
+        return "password changed"
+    else:
+        return None
