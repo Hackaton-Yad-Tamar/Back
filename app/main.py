@@ -1,12 +1,10 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware  # Import CORS middleware
-
+from fastapi.middleware.cors import CORSMiddleware
 from .api.endpoints.admin.dashboard import dashboard_router
 from .api.endpoints.users import users_router
 from .api.endpoints.admin.approval_api import approve_users
 
 app = FastAPI()
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allows all origins (you can restrict this in production)
