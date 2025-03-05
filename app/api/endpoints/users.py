@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.request import RequestType
-from app.models.user import City, License, User, Volunteer
-from app.schemas.user import DTO_for_vulenteer_signup, UserDTO_for_signin
+from app.models.user import City, Family, License, User, Volunteer
+from app.schemas.user import DTO_for_family_signup, DTO_for_vulenteer_signup, UserDTO_for_signin
 import uuid
 
 from app.models.user import User
@@ -20,7 +20,7 @@ def signIn(
     return {"isFirstTime": False}
 
 @users_router.post("/signup/vulenteer")
-def signUp(
+def signUpVulenteer(
     userDetails: DTO_for_vulenteer_signup,
     db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == userDetails.email).first()
@@ -35,7 +35,25 @@ def signUp(
     db.refresh(db_user)
 
     
-    return {"isFirstTime": False}
+    return "user created successfully"
+
+@users_router.post("/signup/family")
+def signUpVulenteer(    
+    userDetails: DTO_for_family_signup,
+    db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.email == userDetails.email).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Username already registered")
+    user_id = str(uuid.uuid4())[:9]
+    db_user = User(id = user_id, first_name=userDetails.first_name,last_name=userDetails.last_name, phone_number=userDetails.phone_number,address = userDetails.address,profile_picture = userDetails.profile_picture,email = userDetails.email,user_type = 1, city = userDetails.city )
+    fam_user = Family(user_id = user_id, building_type = userDetails.building_type, floor_number = userDetails.floor_number, has_parking = userDetails.has_parking, has_elevator = userDetails.has_elevator, is_private_house = userDetails.is_private_house )
+    db.add(db_user)
+    db.add(fam_user)
+    db.commit()
+    db.refresh(db_user)
+
+    
+    return "user created successfully"
 @users_router.get("/cities")
 def getCities(
     db: Session = Depends(get_db)):
