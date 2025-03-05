@@ -10,21 +10,21 @@ dashboard_router = APIRouter()
 
 
 @dashboard_router.get("/city-count")
-def get_city_count(start_date: str, end_date: str, status: str = None, request_type: str = None,
+def get_city_count(start_date: str, end_date: str, status: str = None, request_type: str = None, city: str = None,
                    db: Session = Depends(get_db)):
-    return city_count(db, parser.parse(start_date), parser.parse(end_date), status, request_type)
+    return city_count(db, parser.parse(start_date), parser.parse(end_date), status, request_type, city)
 
 
 @dashboard_router.get("/status-count")
-def get_status_count(start_date: str, end_date: str, city: str = None, request_type: str = None,
+def get_status_count(start_date: str, end_date: str, status: str = None, request_type: str = None, city: str = None,
                      db: Session = Depends(get_db)):
-    return status_count(db, parser.parse(start_date), parser.parse(end_date), city, request_type)
+    return status_count(db, parser.parse(start_date), parser.parse(end_date), status, request_type, city)
 
 
 @dashboard_router.get("/type-count")
-def get_type_count(start_date: str, end_date: str, city: str = None,
+def get_type_count(start_date: str, end_date: str, status: str = None, request_type: str = None, city: str = None,
                    db: Session = Depends(get_db)):
-    return type_count(db, parser.parse(start_date), parser.parse(end_date), city)
+    return type_count(db, parser.parse(start_date), parser.parse(end_date), status, request_type, city)
 
 
 @dashboard_router.get("/request-completion-time")
