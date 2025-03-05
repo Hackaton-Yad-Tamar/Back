@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.models.user import City, User, Volunteer
+from app.models.request import RequestType
+from app.models.user import City, License, User, Volunteer
 from app.schemas.user import DTO_for_vulenteer_signup, UserDTO_for_signin
 import uuid
 
@@ -41,8 +42,14 @@ def getCities(
     cities = db.query(City).all()
     return cities
 
-# @users_router.get("/cities")
-# def getCities(
-#     db: Session = Depends(get_db)):
-#     cities = db.query(City).all()
-#     return cities
+@users_router.get("/licenses")
+def getLicenses(
+    db: Session = Depends(get_db)):
+    licenses = db.query(License).all()
+    return licenses
+
+@users_router.get("/skills")
+def getLicenses(
+    db: Session = Depends(get_db)):
+    skills = db.query(RequestType).all()
+    return skills
