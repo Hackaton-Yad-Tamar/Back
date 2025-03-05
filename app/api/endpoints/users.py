@@ -8,6 +8,8 @@ import uuid
 
 from app.models.user import User
 
+from app.models.user import User
+
 users_router = APIRouter()
 
 @users_router.post("/signin")

@@ -9,7 +9,7 @@ from app.models.user import City
 
 
 def city_count(session: Session, start_date: datetime, end_date: datetime, status: Optional[int] = None,
-               request_type: Optional[int] = None):
+               request_type: Optional[str] = None, city: Optional[str] = None):
     """
         The function below is used to get the count of requests based on the city, status and type of request.
         The function takes in the following parameters:
@@ -28,8 +28,10 @@ def city_count(session: Session, start_date: datetime, end_date: datetime, statu
         query = query.join(RequestStatus, Request.status == RequestStatus.id)
         filters.append(RequestStatus.status_name == status)
     if request_type is not None:
-        query = query.join(RequestType, Request.status == RequestType.id)
+        query = query.join(RequestType, Request.request_type == RequestType.id)
         filters.append(RequestType.type_name == request_type)
+    if city is not None:
+        filters.append(City.city_name == city)
 
     query = (
         query
@@ -38,13 +40,15 @@ def city_count(session: Session, start_date: datetime, end_date: datetime, statu
         .group_by(City.city_name)
     )
 
+    print(query)
+
     res = query.all()
 
     return {city: count for city, count in res}
 
 
-def status_count(session: Session, start_date: datetime, end_date: datetime, city: Optional[int] = None,
-                 request_type: Optional[int] = None):
+def status_count(session: Session, start_date: datetime, end_date: datetime, status: Optional[int] = None,
+                 request_type: Optional[str] = None, city: Optional[str] = None):
     """
         The function below is used to get the count of status (open and closed) requests based on the city, and type of request.
         The function takes in the following parameters:
@@ -63,8 +67,10 @@ def status_count(session: Session, start_date: datetime, end_date: datetime, cit
         query = query.join(City, Request.city == City.id)
         filters.append(City.city_name == city)
     if request_type is not None:
-        query = query.join(RequestType, Request.status == RequestType.id)
+        query = query.join(RequestType, Request.request_type == RequestType.id)
         filters.append(RequestType.type_name == request_type)
+    if status is not None:
+        filters.append(RequestStatus.status_name == status)
 
     query = (
         query
@@ -78,7 +84,8 @@ def status_count(session: Session, start_date: datetime, end_date: datetime, cit
     return {status: count for status, count in res}
 
 
-def type_count(session: Session, start_date: datetime, end_date: datetime, city: Optional[int] = None):
+def type_count(session: Session, start_date: datetime, end_date: datetime, status: Optional[int] = None,
+               request_type: Optional[str] = None, city: Optional[str] = None):
     """
         The function below is used to get the count of requests based on the type of request.
         The function takes in the following parameters:
@@ -95,6 +102,11 @@ def type_count(session: Session, start_date: datetime, end_date: datetime, city:
     if city is not None:
         query = query.join(City, Request.city == City.id)
         filters.append(City.city_name == city)
+    if status is not None:
+        query = query.join(RequestStatus, Request.status == RequestStatus.id)
+        filters.append(RequestStatus.status_name == status)
+    if request_type is not None:
+        filters.append(RequestType.type_name == request_type)
 
     query = (
         query
@@ -109,7 +121,7 @@ def type_count(session: Session, start_date: datetime, end_date: datetime, city:
 
 
 def request_completion_time(session: Session, start_date: datetime, end_date: datetime, city: Optional[int] = None,
-                            request_type: Optional[int] = None):
+                            request_type: Optional[str] = None):
     """
         The function below is used to get the time taken to close a request based on the city, and type of request.
         The function takes in the following parameters:
