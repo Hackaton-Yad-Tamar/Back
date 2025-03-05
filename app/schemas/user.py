@@ -17,7 +17,7 @@ class DTO_users_for_signup(BaseModel):
     phone_number: str = Field(..., min_length=2, max_length=20)
     address: str
     city: int
-    profile_picture: str
+    profile_picture: Optional[str] = None
     email: EmailStr
 
 
