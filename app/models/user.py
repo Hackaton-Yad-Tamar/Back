@@ -1,11 +1,12 @@
 from datetime import datetime
 from typing import List, Optional, Callable
 
-from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, TIMESTAMP, CHAR, DateTime
-from sqlalchemy.orm import relationship, declarative_base, Mapped, Session
+from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, CHAR, DateTime, \
+    SQLColumnExpression
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import relationship, Mapped, Session
 
 from app.models.request import Base
-
 
 
 class UserType(Base):
@@ -21,6 +22,10 @@ class UserType(Base):
 class UserStatus(Base):
     __tablename__ = 'user_status'
 
+    PENDING = 0
+    APPROVED = 1
+    REJECTED = 2
+
     id: str = Column(Integer, primary_key=True)  # Primary key for UserStatus
     name: str = Column(String(50), nullable=False)  # Status name (e.g., 'pending', 'approved', 'rejected')
 
@@ -31,7 +36,8 @@ class City(Base):
     __tablename__ = 'cities'
 
     id = Column(Integer, primary_key=True, autoincrement=True)  # Primary key for Cities
-    name = Column(String(50), unique=True, nullable=False)  # City name (e.g., 'Istanbul', 'Ankara', 'Izmir')
+    city_name = Column(String(50), unique=True,
+                       nullable=False)  # City name (e.g., 'Istanbul', 'Ankara', 'Izmir')
 
     users = relationship("User", back_populates="city")  # Relationship to User table
     volunteers = relationship("Volunteer", back_populates="preferred_city_relation")  # Relationship to Volunteer table
@@ -54,6 +60,8 @@ class User(Base):
     city: Mapped[City] = relationship("City", back_populates="users")  # User's city
     user_type: Mapped[UserType] = relationship("UserType", back_populates="users")  # User's type
     status: Mapped[UserStatus] = relationship("UserStatus", back_populates="users")  # User's status
+    email = Column(String(100), unique=True, nullable=False)
+    password_hash = Column(Text)
 
     approved_at: Optional[datetime] = Column(DateTime,
                                              nullable=True)  # Timestamp for when the user was approved (optional)
@@ -63,11 +71,10 @@ class User(Base):
                           nullable=False)  # Foreign key reference to Cities table
     user_type_id: int = Column("user_type", Integer, ForeignKey("user_types.id"),
                                nullable=False)  # Foreign key reference to User_Types table
-    status_id: int = Column("status", Integer, ForeignKey("user_status.id"),
+    status_id: int = Column("user_status", Integer, ForeignKey("user_status.id"),
                             nullable=False)  # Foreign key reference to User_Status table
-    approved_by_id: Optional[str] = Column(String(9), ForeignKey("users.id"),
+    approved_by_id: Optional[str] = Column("approved_by", String(9), ForeignKey("users.id"),
                                            nullable=True)  # Foreign key reference to the approving user (optional)
-    authentication = relationship("Authentication", uselist=False, back_populates="user")
     families = relationship("Family", uselist=False, back_populates="user")
     volunteers = relationship("Volunteer", uselist=False, back_populates="user")
 
@@ -80,10 +87,33 @@ class User(Base):
         :param kwargs: Attributes to update for the user
         :return: The updated user if found, None otherwise
         """
-        raise NotImplementedError
+        try:
+            # Fetch the user by ID
+            user = User.get_user(session, user_id)
+
+            # If user does not exist, return None
+            if not user:
+                return None
+
+            # Update user attributes
+            for key, value in kwargs.items():
+                if hasattr(user, key):  # Ensure the attribute exists
+                    setattr(user, key, value)
+
+            # Commit changes
+            session.commit()
+            session.refresh(user)  # Refresh to get updated data from the database
+
+            return user
+
+        except SQLAlchemyError as e:
+            session.rollback()  # Rollback on error
+            print(f"Error updating user: {e}")
+            return None
 
     @classmethod
-    def get_users(cls, session: Session, order_by: Optional[List[Callable]] = None, filters: dict = None) \
+    def get_users(cls, session: Session, order_by: Optional[List[Callable]] = None,
+                  filters: Optional[List[SQLColumnExpression]] = None) \
             -> List['User']:
         """
         Retrieve a list of users from the database based on the provided filters.
@@ -92,7 +122,18 @@ class User(Base):
         :param filters: Filters to apply to the query
         :return: List of users matching the filters
         """
-        raise NotImplementedError
+
+        query = session.query(cls)
+
+        # Apply filters if provided
+        if filters is not None:
+            query = query.filter(*filters)
+
+        # Apply ordering if provided
+        if order_by is not None:
+            query = query.order_by(*order_by)
+
+        return query.all()
 
     @classmethod
     def get_user(cls, session: Session, user_id: str) -> Optional['User']:
@@ -102,17 +143,7 @@ class User(Base):
         :param user_id: Identifier for the user to retrieve
         :return: The user if found, None otherwise
         """
-        raise NotImplementedError
-
-
-class Authentication(Base):
-    __tablename__ = 'authentication'
-
-    user_id = Column(CHAR(9), ForeignKey('users.id'), primary_key=True)
-    email = Column(String(100), unique=True, nullable=False)
-    password_hash = Column(Text, nullable=False)
-
-    user = relationship("User", back_populates="authentication")
+        return session.query(User).filter_by(id=user_id).first()
 
 
 class Family(Base):
@@ -127,16 +158,6 @@ class Family(Base):
 
     user = relationship("User", back_populates="families")
     requests = relationship("Request", back_populates="family_relation")
-
-
-class RequestType(Base):
-    __tablename__ = 'request_types'
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    type_name = Column(String(50), unique=True, nullable=False)
-
-    requests = relationship("Request", back_populates="request_type_relation")
-    volunteers = relationship("Volunteer", back_populates="preferred_skill_relation")
 
 
 class License(Base):
