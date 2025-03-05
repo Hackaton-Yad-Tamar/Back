@@ -23,7 +23,7 @@ class UserStatus(Base):
     id: str = Column(Integer, primary_key=True)  # Primary key for UserStatus
     name: str = Column(String(50), nullable=False)  # Status name (e.g., 'pending', 'approved', 'rejected')
 
-users: Mapped[List['User']] = relationship("User", back_populates="user_status_relation")  # Relationship to User table
+    users: Mapped[List['User']] = relationship("User", back_populates="user_status_relation")  # Relationship to User table
 
 
 class City(Base):

@@ -26,8 +26,8 @@ def signUp(
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
     user_id = str(uuid.uuid4())[:9]
-    db_user = User(id = user_id, first_name=userDetails.first_name,last_name=userDetails.last_name, phone_number=userDetails.phone_number,address = userDetails.address,profile_picture = userDetails.profile_pic,email = userDetails.email,user_type = 2, city = userDetails.pref_city )
-    vol_user = Volunteer(user_id = user_id, preferred_city = userDetails.pref_city, preferred_skill = userDetails.skill_type, license_level = userDetails.license_type )
+    db_user = User(id = user_id, first_name=userDetails.first_name,last_name=userDetails.last_name, phone_number=userDetails.phone_number,address = userDetails.address,profile_picture = userDetails.profile_picture,email = userDetails.email,user_type = 2, city = userDetails.city )
+    vol_user = Volunteer(user_id = user_id, preferred_city = userDetails.preferred_city, preferred_skill = userDetails.preferred_skill, license_level = userDetails.license_level )
     db.add(db_user)
     db.add(vol_user)
     db.commit()
