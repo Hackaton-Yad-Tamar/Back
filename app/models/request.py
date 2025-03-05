@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship, declarative_base
 
 Base = declarative_base()
 
+
 class RequestStatus(Base):
     __tablename__ = 'request_status'
     

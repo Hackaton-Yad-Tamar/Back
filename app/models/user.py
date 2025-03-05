@@ -4,7 +4,8 @@ from typing import List, Optional, Callable
 from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, TIMESTAMP, CHAR, DateTime
 from sqlalchemy.orm import relationship, declarative_base, Mapped, Session
 
-Base = declarative_base()
+from app.models.request import Base
+
 
 
 class UserType(Base):
@@ -58,13 +59,13 @@ class User(Base):
                                              nullable=True)  # Timestamp for when the user was approved (optional)
     created_at: datetime = Column(DateTime, default=datetime.now)  # Timestamp for when the user record was created
 
-    city_id: int = Column("city", Integer, ForeignKey("Cities.id"),
+    city_id: int = Column("city", Integer, ForeignKey("cities.id"),
                           nullable=False)  # Foreign key reference to Cities table
-    user_type_id: int = Column("user_type", Integer, ForeignKey("User_Types.id"),
+    user_type_id: int = Column("user_type", Integer, ForeignKey("user_types.id"),
                                nullable=False)  # Foreign key reference to User_Types table
-    status_id: int = Column("status", Integer, ForeignKey("User_Status.id"),
+    status_id: int = Column("status", Integer, ForeignKey("user_status.id"),
                             nullable=False)  # Foreign key reference to User_Status table
-    approved_by_id: Optional[str] = Column(String(9), ForeignKey("Users.id"),
+    approved_by_id: Optional[str] = Column(String(9), ForeignKey("users.id"),
                                            nullable=True)  # Foreign key reference to the approving user (optional)
     authentication = relationship("Authentication", uselist=False, back_populates="user")
     families = relationship("Family", uselist=False, back_populates="user")
