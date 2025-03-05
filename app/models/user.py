@@ -1,13 +1,10 @@
-from datetime import datetime
 from typing import List, Optional, Callable
 
-from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, CHAR, DateTime, \
-    SQLColumnExpression
+from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, CHAR, SQLColumnExpression, TIMESTAMP
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import relationship, Mapped, Session
 
 from app.models.request import Base
-from sqlalchemy.exc import SQLAlchemyError
 
 
 class UserType(Base):

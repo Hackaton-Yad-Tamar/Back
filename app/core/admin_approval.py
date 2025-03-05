@@ -41,7 +41,7 @@ def send_email(user_email, subject, message):
 
 def unapproved_users(session: Session) -> List[User]:
     users = User.get_users(session,
-                           filters=[User.status_id == UserStatus.PENDING])  # TODO: replace status with requested
+                           filters=[User.user_status == UserStatus.PENDING])  # TODO: replace status with requested
 
     return users
 
