@@ -39,4 +39,3 @@ class UserDTO_for_signin(BaseModel):
     #data to get from users when signing in
     email: EmailStr
     password: str = Field(..., pattern=HASH_REGEX.pattern)
-    first_sign_in: bool
