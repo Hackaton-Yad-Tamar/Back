@@ -34,12 +34,15 @@ class UserResponse(BaseModel):
             lastName=user.last_name,
             phoneNumber=user.phone_number,
             address=user.address,
-            profilePicture=user.profile_picture,
             city=user.city_relation.city_name,
             userType=user.user_type_relation.type_name,
+            profilePicture=user.profile_picture,
             status=user.user_status_relation.name if user.user_status_relation is not None else 'PENDING',
             approvedAt=user.approved_at,
-            createdAt=user.created_at
+            createdAt=user.created_at,
+            approvedBy=user.approved_by,
+            firstSignIn=user.first_sign_in,
+            email=user.email
         )
 
 
