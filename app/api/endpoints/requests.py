@@ -1,7 +1,7 @@
 #define APIRouter() instance for requests
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional
-from app.models.request import Request, RequestStatus, RequestType
+from app.models.request import Request, RequestType, RequestStatus
 from app.schemas.request import RequestModel
 from app.core.database import get_db
 from sqlalchemy.orm import Session, joinedload
@@ -11,7 +11,7 @@ from sqlalchemy.sql import case, func
 request_router = APIRouter()
 
 @request_router.get("/ai_button")
-def get_requests(user_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
+def ai_requests(user_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     """
     Returns a list of requests with volunteer details and a calculated match percentage.
     
@@ -68,17 +68,28 @@ def get_requests(user_id: Optional[str] = Query(None), db: Session = Depends(get
     # Convert each result row to a dictionary.
     return [dict(row._mapping) for row in results]
 
-@request_router.get("/request")
-def read_all_requests(id: Optional[str] = Query(None), db: Session = Depends(get_db)):
+@request_router.get("/request") #add status object, 
+def get_all_requests(id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     if id:
         results = db.query(Request).options(joinedload(Request.request_type_relation).filter(Request.id == id)).all()
     else:
         results = db.query(Request).options(joinedload(Request.request_type_relation)).all()
+        # filters = [Request.created_at.between(start_date, end_date)]
+
+    # query = db.query(RequestStatus.status_name, func.count(Request.id))
+    # query = query.join(RequestType, Request.request_type == RequestType.id)
+    # query = (
+    #     query
+    #     .join(RequestStatus, Request.status == RequestStatus.id)
+    #     .group_by(RequestStatus.status_name)
+    # )
+
+    # res = query.all()
     return results
 
 # Create a New Request
 @request_router.post("/request", response_model=dict)
-def create_request(request, db: Session = Depends(get_db)):
+def create_request(request: RequestModel, db: Session = Depends(get_db)):
     new_request = Request(**request.model_dump())
     db.add(new_request)
     try:
