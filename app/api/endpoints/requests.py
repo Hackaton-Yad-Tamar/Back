@@ -90,7 +90,9 @@ def get_all_requests(id: Optional[str] = Query(None), db: Session = Depends(get_
 # Create a New Request
 @request_router.post("/request", response_model=dict)
 def create_request(request: RequestModel, db: Session = Depends(get_db)):
-    new_request = Request(**request.model_dump())
+    data = request.model_dump()
+    data["request_type"] = data["request_type"].value  # Convert enum to string
+    new_request = Request(**data)
     db.add(new_request)
     try:
         db.commit()
@@ -99,7 +101,7 @@ def create_request(request: RequestModel, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
-    
+
 @request_router.put("/request/{request_id}", response_model=RequestModel)
 def update_request(request_id: str, updated_request: RequestModel, db: Session = Depends(get_db)):
     db_request = db.query(Request).filter(Request.id == request_id).first()
