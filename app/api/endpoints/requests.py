@@ -97,6 +97,17 @@ def get_all_requests(id: Optional[str] = Query(None), db: Session = Depends(get_
 
     return results_parsed
 
+@request_router.patch("/close_reqeust") #add status object, 
+def close_request(id: str = Query(None), db: Session = Depends(get_db)):
+    try:
+        db.query(Request).filter(Request.id == id).update({'status': 3})
+        db.commit()
+        return True
+    except:
+        db.rollback()
+        return False
+
+
 def to_camel_case(snake_str: str) -> str:
     """Converts snake_case to camelCase."""
     parts = snake_str.split("_")
