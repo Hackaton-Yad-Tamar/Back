@@ -94,7 +94,7 @@ def getLicenses(
     skills = db.query(RequestType).all()
     return skills
 
-@users_router.patch("/update-password")
+@users_router.post("/update-password")
 def update_user_first_name(    
     userDetails: UserDTO_for_signin,
     db: Session = Depends(get_db)):
