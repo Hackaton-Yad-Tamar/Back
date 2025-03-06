@@ -20,9 +20,6 @@ def signIn(
     if user is None:
         raise HTTPException(status_code=404, detail=f"User '{userDetails.email}' not found")
     elif user.first_sign_in is True:
-        user.first_sign_in = False
-        db.commit()
-        db.refresh(user)
         return {"isFirstTime": True}
     return {"isFirstTime": False}
     
@@ -102,6 +99,8 @@ def update_user_first_name(
 
     if user:
         user.password_hash = userDetails.password
+        if user.first_sign_in:
+            user.first_sign_in = False
         db.commit()
         db.refresh(user)
 
