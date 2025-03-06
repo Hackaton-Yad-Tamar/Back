@@ -48,14 +48,14 @@ class RequestStatus(Base):
 
 class RequestModel(BaseModel):
     id: Optional[str] = Field(default_factory=lambda: str(uuid.uuid4()), description="Unique request ID")
-    family_id: int
-    request_type: RequestType
+    family_id: str
+    request_type: int
     description: Optional[str] = None
-    city: int
+    city: int = 1
     status: Optional[int] = 1
     requires_vehicle: Optional[bool] = False
     is_urgent: Optional[bool] = False
-    assigned_volunteer_id: Optional[int] = None
+    assigned_volunteer_id: Optional[str] = None
     expected_completion: Optional[datetime] = None
     preferred_datetime: Optional[datetime] = None
     created_at: Optional[datetime] = None  # Only set when returning a request

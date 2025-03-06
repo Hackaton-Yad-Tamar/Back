@@ -97,6 +97,17 @@ def get_all_requests(id: Optional[str] = Query(None), db: Session = Depends(get_
 
     return results_parsed
 
+@request_router.patch("/close_reqeust") #add status object, 
+def close_request(id: str = Query(None), db: Session = Depends(get_db)):
+    try:
+        db.query(Request).filter(Request.id == id.ljust(9)).update({'status': 3})
+        db.commit()
+        return True
+    except:
+        db.rollback()
+        return False
+
+
 def to_camel_case(snake_str: str) -> str:
     """Converts snake_case to camelCase."""
     parts = snake_str.split("_")
@@ -135,7 +146,7 @@ def get_family_requests(family_id: str, db: Session = Depends(get_db)):
 @request_router.post("/request", response_model=dict)
 def create_request(request: RequestModel, db: Session = Depends(get_db)):
     data = request.model_dump()
-    data["request_type"] = data["request_type"].value  # Convert enum to string
+    data["request_type"] = data["request_type"]
     new_request = Request(**data)
     db.add(new_request)
     try:
@@ -162,13 +173,15 @@ def update_request(request_id: str, updated_request: RequestModel, db: Session =
 # Delete a request
 @request_router.delete("/request/{request_id}", response_model=dict)
 def delete_request(request_id: str, db: Session = Depends(get_db)):
-    db_request = db.query(Request).filter(Request.id == request_id).first()
-    if not db_request:
+    db_request = db.query(Request).filter(Request.id == request_id.ljust(9))
+
+    if not db_request.first():
         raise HTTPException(status_code=404, detail="Request not found")
 
-    db.delete(db_request)
+    db_request.delete(synchronize_session=False)
     db.commit()
-    return {"message": "Request deleted successfully"}
+
+    return {"message": f"Request {request_id} deleted successfully"}
 
 # @request_router.get("/request/statuses", response_model=List[RequestStatus])
 # def get_all_statuses(db: Session = Depends(get_db)):
