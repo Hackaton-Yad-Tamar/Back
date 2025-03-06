@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker, Session
 
 from app.api.endpoints.requests import request_router
 from app.api.endpoints.request_type import request_type_router
+from app.api.endpoints.request_status import request_status_router
 from app.core.database import engine
 from fastapi.middleware.cors import CORSMiddleware  
 Base = declarative_base()
@@ -24,5 +25,6 @@ app.add_middleware(
 
 app.include_router(request_router, prefix="/api")
 app.include_router(request_type_router, prefix="/api")
+app.include_router(request_status_router, prefix="/api")
     # Create tables in the database
 Base.metadata.create_all(bind=engine)

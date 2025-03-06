@@ -7,6 +7,6 @@ request_type_router = APIRouter()
 
 
 @request_type_router.get("/request_type")
-def read_all_requests( db: Session = Depends(get_db)):
+def request_types( db: Session = Depends(get_db)):
     results = db.query(RequestType).all()
     return results
