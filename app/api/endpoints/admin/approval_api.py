@@ -15,31 +15,31 @@ approve_users = APIRouter()
 
 class UserResponse(BaseModel):
     id: str
-    first_name: str
-    last_name: str
-    phone_number: Optional[str]
+    firstName: str
+    lastName: str
+    phoneNumber: Optional[str]
     address: Optional[str]
-    profile_picture: Optional[str]
-    city_id: int
-    user_type_id: int
-    status_id: Optional[int]
-    approved_at: Optional[datetime]
-    created_at: datetime
+    profilePicture: Optional[str]
+    city: int
+    userType: int
+    status: Optional[int]
+    approvedAt: Optional[datetime]
+    createdAt: datetime
 
     @staticmethod
     def from_alchemy(user: User):
         return UserResponse(
             id=user.id,
-            first_name=user.first_name,
-            last_name=user.last_name,
-            phone_number=user.phone_number,
+            firstName=user.first_name,
+            lastName=user.last_name,
+            phoneNumber=user.phone_number,
             address=user.address,
-            profile_picture=user.profile_picture,
-            city_id=user.city,
-            user_type_id=user.user_type,
-            status_id=user.user_status,
-            approved_at=user.approved_at,
-            created_at=user.created_at
+            profilePicture=user.profile_picture,
+            city=user.city,
+            userType=user.user_type,
+            status=user.user_status,
+            approvedAt=user.approved_at,
+            createdAt=user.created_at
         )
 
 
