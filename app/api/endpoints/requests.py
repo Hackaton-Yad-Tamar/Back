@@ -100,7 +100,7 @@ def get_all_requests(id: Optional[str] = Query(None), db: Session = Depends(get_
 @request_router.patch("/close_reqeust") #add status object, 
 def close_request(id: str = Query(None), db: Session = Depends(get_db)):
     try:
-        db.query(Request).filter(Request.id == id).update({'status': 3})
+        db.query(Request).filter(Request.id == id.ljust(9)).update({'status': 3})
         db.commit()
         return True
     except:
@@ -173,7 +173,7 @@ def update_request(request_id: str, updated_request: RequestModel, db: Session =
 # Delete a request
 @request_router.delete("/request/{request_id}", response_model=dict)
 def delete_request(request_id: str, db: Session = Depends(get_db)):
-    db_request = db.query(Request).filter(Request.id == request_id)
+    db_request = db.query(Request).filter(Request.id == request_id.ljust(9))
 
     if not db_request.first():
         raise HTTPException(status_code=404, detail="Request not found")
