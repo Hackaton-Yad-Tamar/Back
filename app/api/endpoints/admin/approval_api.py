@@ -20,8 +20,8 @@ class UserResponse(BaseModel):
     phoneNumber: Optional[str]
     address: Optional[str]
     profilePicture: Optional[str]
-    city: int
-    userType: int
+    city: str
+    userType: str
     status: Optional[int]
     approvedAt: Optional[datetime]
     createdAt: datetime
@@ -35,9 +35,9 @@ class UserResponse(BaseModel):
             phoneNumber=user.phone_number,
             address=user.address,
             profilePicture=user.profile_picture,
-            city=user.city,
-            userType=user.user_type,
-            status=user.user_status,
+            city=user.city_relation.city_name,
+            userType=user.user_type_relation.type_name,
+            status=user.user_status_relation.status_name,
             approvedAt=user.approved_at,
             createdAt=user.created_at
         )
