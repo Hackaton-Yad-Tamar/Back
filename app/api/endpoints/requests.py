@@ -112,17 +112,3 @@ def delete_request(request_id: str, db: Session = Depends(get_db)):
     db.delete(db_request)
     db.commit()
     return {"message": "Request deleted successfully"}
-
-@request_router.get("/request/statuses", response_model=List[RequestStatus])
-def get_all_statuses(db: Session = Depends(get_db)):
-    statuses = db.query(RequestStatus).all()
-    if statuses is None:
-        raise HTTPException(status_code=404, detail="No statuses found")
-    return statuses
-
-@request_router.get("/request/request_types", response_model=List[RequestType])
-def get_all_request_types(db: Session = Depends(get_db)):
-    types = db.query(RequestType).all()
-    if not types:
-        raise HTTPException(status_code=404, detail="No request types found")
-    return types
