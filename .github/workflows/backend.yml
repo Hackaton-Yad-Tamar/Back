@@ -3,10 +3,10 @@ name: CI/CD for Backend
 on:
   push:
     branches:
-      - dev
+      - workflow-back
   pull_request:
     branches:
-      - dev
+      - workflow-back
 
 jobs:
   build-back:
