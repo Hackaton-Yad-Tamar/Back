@@ -34,8 +34,7 @@ class City(Base):
     __tablename__ = 'cities'
 
     id = Column(Integer, primary_key=True, autoincrement=True)  # Primary key for Cities
-    city_name = Column(String(50), unique=True,
-                       nullable=False)  # City name (e.g., 'Istanbul', 'Ankara', 'Izmir')
+    city_name = Column(String(50), unique=True, nullable=False)  # City name (e.g., 'Istanbul', 'Ankara', 'Izmir')
 
     users = relationship("User", back_populates="city_relation")  # Relationship to User table
     volunteers = relationship("Volunteer", back_populates="preferred_city_relation")  # Relationship to Volunteer table
