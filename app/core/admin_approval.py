@@ -46,7 +46,7 @@ def unapproved_users(session: Session) -> List[User]:
     return users
 
 
-def do_approve_user(session: Session, user_id: string):
+def do_approve_user(session: Session, user_id: str):
     """
     Approve or reject a user based on the user_id
     if approved:
@@ -61,7 +61,7 @@ def do_approve_user(session: Session, user_id: string):
     """
     user = User.get_user(session, user_id)
     if user:
-        user.status_id = UserStatus.APPROVED
+        user.user_status = UserStatus.APPROVED
         # generate new password
         characters = string.ascii_letters + string.digits  # Letters (uppercase + lowercase) and digits
         password = ''.join(random.choice(characters) for _ in range(12))  # Randomly choose characters
@@ -76,7 +76,7 @@ def do_approve_user(session: Session, user_id: string):
     return None
 
 
-def do_reject_user(session: Session, user_id: string):
+def do_reject_user(session: Session, user_id: str):
     user = User.get_user(session, user_id)
     if user:
         user.status_id = UserStatus.REJECTED
