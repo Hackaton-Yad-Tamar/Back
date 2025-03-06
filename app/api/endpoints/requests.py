@@ -9,8 +9,89 @@ from sqlalchemy.orm import Session, joinedload, contains_eager
 from app.models.user import *
 from sqlalchemy.sql import case, func
 import re
+from sqlalchemy import text
+
 
 request_router = APIRouter()
+
+@request_router.get("/community_agregates")
+def get_community_agregates(db: Session = Depends(get_db)):
+    # run the sql quary "select * from users limit 1"
+
+    query1 = text("""SELECT u.first_name || ' ' || u.last_name AS full_name, 
+            u.profile_picture, 
+            ROUND(SUM(EXTRACT(EPOCH FROM (r.expected_completion - r.preferred_datetime)) / 3600)) AS total_hours
+            FROM Requests r
+            JOIN Users u ON r.assigned_volunteer_id = u.id
+            WHERE r.assigned_volunteer_id IS NOT NULL
+            GROUP BY r.assigned_volunteer_id, u.first_name, u.last_name, u.profile_picture
+            ORDER BY total_hours DESC
+            LIMIT 1;""")
+    result = db.execute(query1).all()
+    result = [dict(row._mapping) for row in result]
+
+    community_agregates = [{
+                    "achievement_name": "המתנדב החרוץ",
+                    "image": result[0]["profile_picture"],
+                    "volunteer_name": result[0]["full_name"],
+                    "value": result[0]["total_hours"]
+                },]
+    
+
+    # query = text("""SELECT u.first_name || ' ' || u.last_name AS full_name, 
+    #                     u.profile_picture, 
+    #                     COUNT(DISTINCT r.request_type) AS unique_request_types
+    #                 FROM Requests r
+    #                 JOIN Users u ON r.assigned_volunteer_id = u.id
+    #                 WHERE r.assigned_volunteer_id IS NOT NULL
+    #                 GROUP BY r.assigned_volunteer_id, u.first_name, u.last_name, u.profile_picture
+    #                 ORDER BY unique_request_types DESC
+    #                 LIMIT 1;
+    #                 """)
+    
+
+
+    
+
+    result = [
+                community_agregates[0],
+                {
+                    "achievement_name": "המתנדב רחב ההשפעה",
+                    "image": "https://via.placeholder.com/100",
+                    "volunteer_name": "שמעון",
+                    "value": 40
+                },
+                {
+                    "achievement_name": "המתנדב המהיר",
+                    "image": "https://via.placeholder.com/100",
+                    "volunteer_name": "דוד לוי",
+                    "value": 15
+                },
+                {
+                    "achievement_name": "המתנדב מרחיק הלכת",
+                    "image": "https://via.placeholder.com/100",
+                    "volunteer_name": "רון כהן",
+                    "value": 300
+                },
+                {
+                    "achievement_name": "המתנדב הרב-תחומי",
+                    "image": "https://via.placeholder.com/100",
+                    "volunteer_name": "מאיה רוזן",
+                    "value": 5
+                },
+                {
+                    "achievement_name": "המתנדב המקצועי",
+                    "image": "https://via.placeholder.com/100",
+                    "volunteer_name": "יעל אבקסיס",
+                    "value": 4.8
+                }
+            ]
+    
+    print(result)
+                        
+    return result
+
+
 
 @request_router.get("/ai_button")
 def ai_requests(user_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
