@@ -18,6 +18,8 @@ class RequestStatus(Base):
     requests = relationship("Request", back_populates="status_relation")
     request_processes = relationship("RequestProcess", back_populates="status_relation")
 
+#all status
+#all requests types
 
 class Request(Base):
     __tablename__ = 'requests'
@@ -26,12 +28,14 @@ class Request(Base):
     family_id = Column(CHAR(9), ForeignKey('families.user_id'), nullable=False)
     request_type = Column(Integer, ForeignKey('request_types.id'), nullable=False)
     description = Column(Text, nullable=True)
-    city = Column(Integer, ForeignKey('cities.id'), nullable=False)
-    status = Column(Integer, ForeignKey('request_status.id'), default=1)
+    city = Column(Integer, ForeignKey('cities.id'), nullable=False) 
+    status = Column(Integer, ForeignKey('request_status.id'), default=1) # add more
     is_urgent = Column(Boolean, default=False)
+    requires_vehicle  = Column(Boolean, default=False)
     assigned_volunteer_id = Column(CHAR(9), ForeignKey('volunteers.user_id'), nullable=True)
     expected_completion = Column(TIMESTAMP, nullable=True)
     preferred_datetime = Column(TIMESTAMP, nullable=True)
+
     created_at = Column(TIMESTAMP, server_default='NOW()')
 
     family_relation = relationship("Family", back_populates="requests")
