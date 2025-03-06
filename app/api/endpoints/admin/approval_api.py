@@ -41,7 +41,7 @@ class UserResponse(BaseModel):
             approvedAt=user.approved_at,
             createdAt=user.created_at,
             approvedBy=user.approved_by,
-            firstSignIn=user.first_sign_in
+            firstSignIn=user.first_sign_in,
             email=user.email
         )
 
