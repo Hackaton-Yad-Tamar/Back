@@ -19,9 +19,7 @@ def signIn(
     user = db.query(User).filter_by(email=userDetails.email, password_hash=userDetails.password).first()
     if user is None:
         raise HTTPException(status_code=404, detail=f"User '{userDetails.email}' not found")
-    elif user.first_sign_in is True:
-        return {"isFirstTime": True}
-    return {"isFirstTime": False}
+    return user
     
     
 
@@ -104,6 +102,6 @@ def update_user_first_name(
         db.commit()
         db.refresh(user)
 
-        return "password changed"
+        return user
     else:
         return None
