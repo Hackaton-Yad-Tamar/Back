@@ -1,8 +1,6 @@
-from datetime import datetime
 from typing import List, Optional, Callable
 
-from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, CHAR, DateTime, \
-    SQLColumnExpression
+from sqlalchemy import Column, DateTime, Integer, String, Boolean, Text, ForeignKey, CHAR, SQLColumnExpression, TIMESTAMP
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import relationship, Mapped, Session
 
@@ -13,10 +11,10 @@ class UserType(Base):
     __tablename__ = 'user_types'
 
     id: str = Column(Integer, primary_key=True, autoincrement=True)  # Primary key for UserTypes
-    name: str = Column(String(20), unique=True, nullable=False)  # Type name (e.g., 'family', 'volunteer', 'admin')
+    type_name: str = Column(String(20), unique=True, nullable=False)  # Type name (e.g., 'family', 'volunteer', 'admin')
 
     users: Mapped[List['User']] = relationship("User",
-                                               back_populates="user_type")  # Relationship to User table
+                                               back_populates="user_type_relation")  # Relationship to User table
 
 
 class UserStatus(Base):
@@ -29,7 +27,7 @@ class UserStatus(Base):
     id: str = Column(Integer, primary_key=True)  # Primary key for UserStatus
     name: str = Column(String(50), nullable=False)  # Status name (e.g., 'pending', 'approved', 'rejected')
 
-    users: Mapped[List['User']] = relationship("User", back_populates="status")  # Relationship to User table
+    users: Mapped[List['User']] = relationship("User", back_populates="user_status_relation")  # Relationship to User table
 
 
 class City(Base):
@@ -39,42 +37,33 @@ class City(Base):
     city_name = Column(String(50), unique=True,
                        nullable=False)  # City name (e.g., 'Istanbul', 'Ankara', 'Izmir')
 
-    users = relationship("User", back_populates="city")  # Relationship to User table
+    users = relationship("User", back_populates="city_relation")  # Relationship to User table
     volunteers = relationship("Volunteer", back_populates="preferred_city_relation")  # Relationship to Volunteer table
     requests = relationship("Request", back_populates="city_relation")  # Relationship to Request table
 
 
 class User(Base):
-    __tablename__ = 'users'  # Table name in the database
-
-    # Define columns for the User table
-    id: str = Column(String(9), primary_key=True)  # Unique identifier for the user
-
-    first_name: str = Column(String(50), nullable=False)  # User's first name
-    last_name: str = Column(String(50), nullable=False)  # User's last name
-
-    phone_number: Optional[str] = Column(String(20), nullable=True)  # User's phone number (optional)
-    address: Optional[str] = Column(Text, nullable=True)  # User's address (optional)
-    profile_picture: Optional[str] = Column(Text, nullable=True)  # User's profile picture (optional)
-
-    city: Mapped[City] = relationship("City", back_populates="users")  # User's city
-    user_type: Mapped[UserType] = relationship("UserType", back_populates="users")  # User's type
-    status: Mapped[UserStatus] = relationship("UserStatus", back_populates="users")  # User's status
+    __tablename__ = 'users'
+    
+    id = Column(CHAR(9), primary_key=True)
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=False)
+    phone_number = Column(String(20))
+    address = Column(Text)
+    city = Column(Integer, ForeignKey('cities.id'), nullable=False)
+    user_type = Column(Integer, ForeignKey('user_types.id'), nullable=False)
+    profile_picture = Column(Text, nullable=True)
+    user_status = Column(Integer, ForeignKey('user_status.id'), nullable=True)
+    approved_by = Column(CHAR(9), ForeignKey('users.id'), nullable=True)
+    approved_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, server_default='NOW()')
+    first_sign_in = Column(Boolean, default=True)
     email = Column(String(100), unique=True, nullable=False)
-    password_hash = Column(Text)
-
-    approved_at: Optional[datetime] = Column(DateTime,
-                                             nullable=True)  # Timestamp for when the user was approved (optional)
-    created_at: datetime = Column(DateTime, default=datetime.now)  # Timestamp for when the user record was created
-
-    city_id: int = Column("city", Integer, ForeignKey("cities.id"),
-                          nullable=False)  # Foreign key reference to Cities table
-    user_type_id: int = Column("user_type", Integer, ForeignKey("user_types.id"),
-                               nullable=False)  # Foreign key reference to User_Types table
-    status_id: int = Column("user_status", Integer, ForeignKey("user_status.id"),
-                            nullable=False)  # Foreign key reference to User_Status table
-    approved_by_id: Optional[str] = Column("approved_by", String(9), ForeignKey("users.id"),
-                                           nullable=True)  # Foreign key reference to the approving user (optional)
+    password_hash = Column(Text, nullable=False)
+    
+    city_relation = relationship("City", back_populates="users")
+    user_type_relation = relationship("UserType", back_populates="users")
+    user_status_relation = relationship("UserStatus", back_populates="users")
     families = relationship("Family", uselist=False, back_populates="user")
     volunteers = relationship("Volunteer", uselist=False, back_populates="user")
 
@@ -90,7 +79,6 @@ class User(Base):
         try:
             # Fetch the user by ID
             user = User.get_user(session, user_id)
-
             # If user does not exist, return None
             if not user:
                 return None
