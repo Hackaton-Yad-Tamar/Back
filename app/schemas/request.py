@@ -51,8 +51,8 @@ class RequestModel(BaseModel):
     family_id: int
     request_type: RequestType
     description: Optional[str] = None
-    city_id: int
-    status_id: Optional[int] = 1
+    city: int
+    status: Optional[int] = 1
     is_urgent: Optional[bool] = False
     assigned_volunteer_id: Optional[int] = None
     expected_completion: Optional[datetime] = None
