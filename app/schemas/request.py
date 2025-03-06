@@ -53,6 +53,7 @@ class RequestModel(BaseModel):
     description: Optional[str] = None
     city: int
     status: Optional[int] = 1
+    requires_vehicle: Optional[bool] = False
     is_urgent: Optional[bool] = False
     assigned_volunteer_id: Optional[int] = None
     expected_completion: Optional[datetime] = None

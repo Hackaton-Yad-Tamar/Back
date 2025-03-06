@@ -14,6 +14,7 @@ class RequestStatus(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     status_name = Column(String(50), unique=True, nullable=False)
+    status_color = Column(String(6), nullable=False)
 
     requests = relationship("Request", back_populates="status_relation")
     request_processes = relationship("RequestProcess", back_populates="status_relation")
