@@ -1,5 +1,5 @@
 # Pydantic schemas for user
-from pydantic import BaseModel, Field, field_validator, EmailStr
+from pydantic import BaseModel, Field, EmailStr
 from typing import Optional
 import re
 
@@ -16,7 +16,8 @@ class DTO_users_for_signup(BaseModel):
     last_name: str = Field(..., min_length=2, max_length=50)
     phone_number: str = Field(..., min_length=2, max_length=20)
     address: str
-    profile_picture: str
+    city: int
+    profile_picture: Optional[str] = None
     email: EmailStr
 
 
@@ -28,7 +29,7 @@ class DTO_for_vulenteer_signup(DTO_users_for_signup):
 
 
 class DTO_for_family_signup(DTO_users_for_signup):
-    building_type: str = Field(..., min_length=2, max_length=50)
+    building_type: Optional[str] = None
     floor_number: Optional[int]
     has_parking: bool
     has_elevator: Optional[bool]
@@ -37,5 +38,4 @@ class DTO_for_family_signup(DTO_users_for_signup):
 class UserDTO_for_signin(BaseModel):
     #data to get from users when signing in
     email: EmailStr
-    password: str = Field(..., regex=HASH_REGEX.pattern)
-    first_sign_in: bool
+    password: str = Field(..., pattern=HASH_REGEX.pattern)
