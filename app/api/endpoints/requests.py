@@ -2,9 +2,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional
 from app.models.request import Request, RequestType, RequestStatus
+from app.models.user import City
 from app.schemas.request import RequestModel
 from app.core.database import get_db
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, contains_eager
 from app.models.user import *
 from sqlalchemy.sql import case, func
 
@@ -73,19 +74,27 @@ def get_all_requests(id: Optional[str] = Query(None), db: Session = Depends(get_
     if id:
         results = db.query(Request).options(joinedload(Request.request_type_relation).filter(Request.id == id)).all()
     else:
-        results = db.query(Request).options(joinedload(Request.request_type_relation)).all()
-        # filters = [Request.created_at.between(start_date, end_date)]
+        results = (
+    db.query(Request, City, RequestStatus, RequestType, User)
+      .filter(City.id == Request.city)
+      .filter(RequestStatus.id == Request.status)
+      .filter(RequestType.id == Request.request_type)
+      .filter(User.id == Request.family_id)
+      .all()
+    )
 
-    # query = db.query(RequestStatus.status_name, func.count(Request.id))
-    # query = query.join(RequestType, Request.request_type == RequestType.id)
-    # query = (
-    #     query
-    #     .join(RequestStatus, Request.status == RequestStatus.id)
-    #     .group_by(RequestStatus.status_name)
-    # )
+    results_parsed = [
+        {
+            "request": vars(request),
+            "city": vars(city),
+            "status": vars(status),
+            "request_type": vars(req_type),
+            "user": vars(user)
+        }
+        for request, city, status, req_type, user in results
+    ]  
 
-    # res = query.all()
-    return results
+    return results_parsed
 
 # Create a New Request
 @request_router.post("/request", response_model=dict)
