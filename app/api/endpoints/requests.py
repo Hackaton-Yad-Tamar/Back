@@ -10,8 +10,8 @@ from sqlalchemy.sql import case, func
 
 request_router = APIRouter()
 
-@request_router.get("/requests/")
-def get_requests(db: Session = Depends(get_db)):
+@request_router.get("/ai_button")
+def get_requests(user_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     """
     Returns a list of requests with volunteer details and a calculated match percentage.
     
@@ -60,7 +60,7 @@ def get_requests(db: Session = Depends(get_db)):
             # Filter using the relationship’s criteria.
             User.user_type.has(id=2),
             User.approved_by_id.isnot(None),
-            Request.status == 1
+            User.id == user_id
         )
     )
 
