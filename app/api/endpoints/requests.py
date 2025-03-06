@@ -87,6 +87,17 @@ def get_all_requests(id: Optional[str] = Query(None), db: Session = Depends(get_
     # res = query.all()
     return results
 
+@request_router.get("/request/{family_id}")
+def get_family_requests(family_id: str, db: Session = Depends(get_db)):
+    results = (
+        db.query(Request)
+        # .options(joinedload(Request.request_type_relation))
+        .filter(Request.family_id == family_id)  # Filter by user_id
+        .all()
+    )
+
+    return results
+
 # Create a New Request
 @request_router.post("/request", response_model=dict)
 def create_request(request: RequestModel, db: Session = Depends(get_db)):
