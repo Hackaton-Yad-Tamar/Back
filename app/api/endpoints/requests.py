@@ -163,12 +163,14 @@ def update_request(request_id: str, updated_request: RequestModel, db: Session =
 @request_router.delete("/request/{request_id}", response_model=dict)
 def delete_request(request_id: str, db: Session = Depends(get_db)):
     db_request = db.query(Request).filter(Request.id == request_id).first()
+
     if not db_request:
         raise HTTPException(status_code=404, detail="Request not found")
 
     db.delete(db_request)
     db.commit()
-    return {"message": "Request deleted successfully"}
+
+    return {"message": f"Request {request_id} deleted successfully"}
 
 # @request_router.get("/request/statuses", response_model=List[RequestStatus])
 # def get_all_statuses(db: Session = Depends(get_db)):
