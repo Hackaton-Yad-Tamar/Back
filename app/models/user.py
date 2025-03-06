@@ -11,7 +11,7 @@ class UserType(Base):
     __tablename__ = 'user_types'
 
     id: str = Column(Integer, primary_key=True, autoincrement=True)  # Primary key for UserTypes
-    name: str = Column(String(20), unique=True, nullable=False)  # Type name (e.g., 'family', 'volunteer', 'admin')
+    type_name: str = Column(String(20), unique=True, nullable=False)  # Type name (e.g., 'family', 'volunteer', 'admin')
 
     users: Mapped[List['User']] = relationship("User",
                                                back_populates="user_type_relation")  # Relationship to User table
