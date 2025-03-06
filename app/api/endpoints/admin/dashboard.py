@@ -3,7 +3,7 @@ from dateutil import parser
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.adminview_db import city_count, status_count, type_count, request_completion_time
+from app.core.adminview_db import city_count, status_count, type_count, request_completion_time, filtered_data
 from app.core.database import get_db
 
 dashboard_router = APIRouter()
@@ -32,3 +32,9 @@ def get_request_completion_time(start_date: str, end_date: str, city: str = None
                                 db: Session = Depends(get_db)):
     return request_completion_time(db, parser.parse(start_date), parser.parse(end_date), city,
                                    request_type)
+    
+
+@dashboard_router.get("/filtered-table")
+def get_filtered_data(start_date: str, end_date: str, status: str = None, request_type: str = None, city: str = None,
+                   db: Session = Depends(get_db)):
+    return filtered_data(db, parser.parse(start_date), parser.parse(end_date), status, request_type, city)
