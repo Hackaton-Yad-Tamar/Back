@@ -135,7 +135,7 @@ def get_family_requests(family_id: str, db: Session = Depends(get_db)):
 @request_router.post("/request", response_model=dict)
 def create_request(request: RequestModel, db: Session = Depends(get_db)):
     data = request.model_dump()
-    data["request_type"] = data["request_type"].value  # Convert enum to string
+    data["request_type"] = data["request_type"]
     new_request = Request(**data)
     db.add(new_request)
     try:
